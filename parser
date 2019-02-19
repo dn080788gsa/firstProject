@@ -1,0 +1,164 @@
+function init() {
+    var script = document.createElement('script');
+    script.type = "text/javascript";
+    script.src="https://code.jquery.com/jquery-3.2.1.min.js";
+    var str = "";
+    document.head.appendChild(script);
+    var phones = Main().split(",");
+
+    phones = getPhoneArr(phones);
+    phones = unique(phones);
+
+    console.log(phones);
+
+    postToCore({
+        "phones": phones
+    });
+
+    console.log("Отправили и засыпаем...");
+    sleep(10000);
+
+    console.log("Выспались");
+
+    openNewW();
+
+    console.log("Запустили клонирование...");
+
+    function Main() {
+        console.log("Начинаем...");
+        console.log(" ");
+
+        var par = document.getElementsByClassName("obyava");
+
+        for (var i=0; i<par.length; i++) {
+            
+            for(var k in par[i]){
+                if (k == "innerText") {
+                    //console.log(k + " - " + par[i][k]);
+                    var q = par[i][k].replace(/ |\(|\)|\/|\-|\;/g, "");
+                    var res = q.match(/380[0-9]{9}|0[0-9]{9}|80[0-9]{9}/ig);
+                    str += res;
+                }
+            }
+        }
+        //console.log(str);
+        return str;
+    }
+
+    function getPhoneArr(arr) {
+        var arrNew = [];
+        var p;
+        for (var i=0; i<arr.length; i++) {
+            if (/^380[0-9]{9}$/.test(arr[i])) {
+                arrNew.push(arr[i]);
+            } else if (/^0[0-9]{9}$/.test(arr[i])) {
+                arrNew.push("38" + arr[i]);
+            } else if (/^80[0-9]{9}$/.test(arr[i])) {
+                arrNew.push("3" + arr[i]);
+            } else if (/^0[0-9]{9}0[0-9]{9}/.test(arr[i])) {
+                var x = arr[i] + "";
+                p = x.match(/0[0-9]{9}/ig);
+                p = getPhoneArr(p);
+                arrNew = concatArr(arrNew, p);
+            } else if (/^380[0-9]{9}0[0-9]{9}/.test(arr[i])) {
+                var x = arr[i] + "";
+                p = x.match(/0[0-9]{9}/ig);
+                p = getPhoneArr(p);
+                arrNew = concatArr(arrNew, p);
+            } else {
+                console.log(" -----> " + arr[i]);
+            }
+        }
+        return arrNew;
+    }
+
+    function concatArr(arr1, arr2) {
+        //console.log(" ARR1 -----> " + arr1);
+        //console.log(" ARR2 -----> " + arr2);
+        var newArr = arr1.concat(arr2);
+        
+        return newArr;
+    }
+
+    function unique(arr) {
+        var obj = {};
+      
+        for (var i = 0; i < arr.length; i++) {
+          var str = arr[i];
+          obj[str] = true; // запомнить строку в виде свойства объекта
+        }
+
+        return Object.keys(obj); // или собрать ключи перебором для IE8-
+    }
+
+    function postToCore(body) {
+        var XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
+        var xhr = new XHR();
+        // (2) запрос на другой домен :)
+        xhr.open('POST', 'https://cp.privatbank.ua/api/1/json/public/188981/4f294cdb86185b0756c1d2e1aec193c1953b1704', true);
+        
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        //xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            //console.log(this.responseText);
+        }
+        xhr.onerror = function() {
+            //console.log( 'Ошибка ' + this.status );
+        }
+        xhr.send(JSON.stringify(body));
+    }
+
+    function openNewW() { 
+        console.log("Клонирование.......................");
+        if (q == "") q = prompt("По какому разделителю резать URL страницы?");
+        var search = window.location.search.split(q);
+        var n = (+search[1]+1);
+        var maxArr;
+        console.log("N: ", n);
+        var stARR = document.getElementsByClassName("norm8td");
+        for (var k in stARR) {
+            //console.log(stARR[k].textContent);
+            if (/Всего/.test(stARR[k].textContent)) {
+                maxArr = stARR[k].textContent.split(" ");
+            }
+        }
+        console.log("W: ", +maxArr[5]);
+        var w = +maxArr[5];
+
+        if (+n == +w || +n > +w) return alert("ЗАКОНЧИЛИ ПЕРЕБОР");
+
+        var url = window.location.origin + window.location.pathname + search[0] + q + n;
+        var newWin = window.open(url); 
+        
+        newWin.onload = function () { 
+            var div = newWin.document.createElement('script'); 
+            div.innerHTML = "function clone(a) {var newfun = new Function('return ' + a.toString())();for (var key in a) newfun[key] = a[key]; return newfun; }; var q = '" + q + "'; var init = clone(opener.init); init();opener.window.close()";   
+            newWin.document.body.appendChild(div); 
+        } 
+    } 
+
+    function sleep(milliseconds) { 
+        var start = new Date().getTime(); 
+        console.log("Старт SLEEP");
+        for (var i = 0; i < 1e7; i++) { 
+            if ((new Date().getTime() - start) > milliseconds) { 
+                break;
+            } 
+        } 
+    } 
+    
+};
+
+function openNewW() { 
+    console.log("Стартовое открытие...");
+    var url = window.location.href;
+    var newWin = window.open(url); 
+    newWin.onload = function () { 
+        var div = newWin.document.createElement('script'); 
+        div.innerHTML = "function clone(a) {var newfun = new Function('return ' + a.toString())();for (var key in a) newfun[key] = a[key]; return newfun; }; var q = ''; var init = clone(opener.init); init();opener.window.close()"; 
+           
+        newWin.document.body.appendChild(div); 
+    } 
+} 
+
+openNewW();
